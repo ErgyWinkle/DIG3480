@@ -1,87 +1,53 @@
-﻿using System.Collections;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
+using System.Collections;
 
+[System.Serializable]
+public class Boundary
+{
+    public float xMin, xMax, zMin, zMax;
+}
 
-public class PlayerController : MonoBehaviour {
+public class PlayerController : MonoBehaviour
+{
     public float speed;
-    public Text countText;
-    public Text winText;
-    public Text livesText;
-    public Text loseText;
+    public float tilt;
+    public float fireRate;
+    public Boundary boundary;
+    public GameObject shot;
+    public Transform shotSpawn;
+    private Rigidbody rb;
+    private float nextFire; 
 
-    private Rigidbody2D rb2d;
-    private int count;
-    private int lives;
-
-    void Start()
+    private void Start()
     {
-        rb2d = GetComponent<Rigidbody2D> ();
-        count = 0;
-        lives = 3;
-        winText.text = "";
-        SetCountText ();
-        loseText.text = "";
-        SetLivesText ();
+        rb = GetComponent<Rigidbody>();
     }
-
-    void Update()
-    {
-        if (Input.GetKey("escape"))
-            Application.Quit();
-    } 
 
     void FixedUpdate()
     {
-        float moveHorizontal = Input.GetAxis ("Horizontal");
+        float moveHorizontal = Input.GetAxis("Horizontal");
         float moveVertical = Input.GetAxis("Vertical");
-        Vector2 movement = new Vector2(moveHorizontal, moveVertical);
-        rb2d.AddForce(movement * speed);
-    }
-    
-    
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject.CompareTag("Pickup"))
-        {
-            other.gameObject.SetActive(false);
-            count = count + 1;
-            SetCountText ();
-        }
 
-        if (other.gameObject.CompareTag("Enemy"))
-        {
-            other.gameObject.SetActive(false);
-            lives = lives - 1;
-            SetLivesText ();
-        }
+        Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
+        rb.velocity = movement * speed;
 
-        if (count == 8)
-        {
-            transform.position = new Vector2(40.0f, 60.0f);
-        }
+        rb.position = new Vector3
+        (
+             Mathf.Clamp(rb.position.x, boundary.xMin, boundary.xMax),
+             0.0f,
+             Mathf.Clamp(rb.position.z, boundary.zMin, boundary.zMax)
+        );
 
-        if (lives <= 0)
-        {
-            Destroy(gameObject);
-        }
+        rb.rotation = Quaternion.Euler(0.0f, 0.0f, rb.velocity.x * -tilt);
     }
 
-    void SetCountText()
+    private void Update()
     {
-        countText.text = "Score: " + count.ToString();
-        if (count >= 16)
+        if (Input.GetButton("Fire1") && Time.time > nextFire)
         {
-            winText.text = "Perfect! Game Created by Ethan Wood!";
-        }
-    }
-
-    void SetLivesText()
-    {
-        livesText.text = "Lives: " + lives.ToString();
-        if (lives <= 0)
-        {
-            loseText.text = "You lose! Press esc to quit and try again!";
+            nextFire = Time.time + fireRate;
+            GameObject clone =
+            Instantiate(shot, shotSpawn.position, shotSpawn.rotation);
         }
     }
 }

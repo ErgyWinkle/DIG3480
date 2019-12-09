@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class GameController : MonoBehaviour
+public class GameControllerHM : MonoBehaviour
 {
     public GameObject[] hazards;
     public Vector3 spawnValues;
@@ -22,7 +22,6 @@ public class GameController : MonoBehaviour
     private bool gameOver;
     private bool restart;
     private int score;
-    private BGScroller background;
 
     void Start()
     {
@@ -34,27 +33,16 @@ public class GameController : MonoBehaviour
         hardModeText.text = "";
         score = 0;
         UpdateScore();
-        StartCoroutine (SpawnWaves());
-        GameObject backgroundObject = GameObject.FindWithTag("Background");
-        {
-            if (backgroundObject != null)
-            {
-                background = backgroundObject.GetComponent<BGScroller>();
-            }
-            if (backgroundObject == null)
-            {
-                Debug.Log("Cannot find 'BGScroller' Script");
-            }
-        }
+        StartCoroutine(SpawnWaves());
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
-            {
-                SceneManager.LoadScene("Space Shooter HM");
-            }
-        
+        {
+            SceneManager.LoadScene("Space Shooter HM");
+        }
+
 
         if (restart)
         {
@@ -75,7 +63,7 @@ public class GameController : MonoBehaviour
         {
             for (int i = 0; i < hazardCount; i++)
             {
-                GameObject hazard = hazards[Random.Range (0,hazards.Length)];
+                GameObject hazard = hazards[Random.Range(0, hazards.Length)];
                 Vector3 spawnPosition = new Vector3(Random.Range(-spawnValues.x, spawnValues.x), spawnValues.y, spawnValues.z);
                 Quaternion spawnRotation = Quaternion.identity;
                 Instantiate(hazard, spawnPosition, spawnRotation);
@@ -85,7 +73,7 @@ public class GameController : MonoBehaviour
 
             if (gameOver)
             {
-                restartText.text = "Press 'E' for restart on normal mode";
+                restartText.text = "Press 'E' for normal mode";
                 restart = true;
                 break;
             }
@@ -105,8 +93,7 @@ public class GameController : MonoBehaviour
             winText.text = "You win! Game created by Ethan Wood";
             gameOver = true;
             restart = true;
-            hardModeText.text = "Press 't' for Hard Mode";
-            background.scrollSpeed = -2;
+            hardModeText.text = "Press 't' for restart in hard mode";
         }
     }
     public void GameOver()
